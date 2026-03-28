@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contador de Pensiones · España 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-deep: #0a0e17;
+      --bg-mid: #0d1525;
+      --bg-card: rgba(15,23,42,0.5);
+      --bg-card-strong: rgba(15,23,42,0.6);
+      --border-subtle: rgba(255,255,255,0.06);
+      --border-blue: rgba(59,130,246,0.15);
+      --border-indigo: rgba(99,102,241,0.2);
+      --text-bright: #f1f5f9;
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --text-dim: #475569;
+      --text-faint: #374151;
+      --blue-accent: #60a5fa;
+      --blue-main: #3b82f6;
+      --indigo-main: #6366f1;
+      --indigo-light: #818cf8;
+      --violet-light: #a78bfa;
+      --violet-pastel: #c4b5fd;
+      --font-body: 'DM Sans', 'Helvetica Neue', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(170deg, var(--bg-deep) 0%, var(--bg-mid) 40%, #111d35 100%);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      opacity: 0.03;
+      background-image:
+        linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glow */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 18%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(59,130,246,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      filter: blur(40px);
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      background: rgba(59,130,246,0.12);
+      border: 1px solid rgba(59,130,246,0.2);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--blue-accent);
+    }
+
+    .header { text-align: center; margin-bottom: 12px; }
+
+    h1 {
+      text-align: center;
+      font-size: clamp(18px, 4vw, 26px);
+      font-weight: 700;
+      margin: 16px 0 8px;
+      line-height: 1.3;
+      background: linear-gradient(135deg, #e8edf5 30%, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0 auto 32px;
+      max-width: 500px;
+    }
+
+    /* Counter card */
+    .counter-card {
+      background: var(--bg-card-strong);
+      border-radius: 20px;
+      border: 1px solid var(--border-blue);
+      padding: 40px 24px 32px;
+      text-align: center;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 80px rgba(59,130,246,0.06), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    .counter-value {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: clamp(28px, 8vw, 56px);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--text-bright);
+      text-shadow: 0 0 40px rgba(59,130,246,0.3);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .counter-value .eur {
+      font-size: 0.45em;
+      color: var(--blue-accent);
+      margin-left: 8px;
+      font-weight: 600;
+    }
+
+    .day-info {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 16px;
+      font-family: var(--font-mono);
+    }
+
+    /* Progress bar */
+    .progress-track {
+      margin-top: 16px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border-subtle);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--blue-main), var(--blue-accent));
+      transition: width 0.5s linear;
+      box-shadow: 0 0 12px rgba(59,130,246,0.5);
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 6px;
+      font-family: var(--font-mono);
+    }
+
+    /* Speed grid */
+    .speed-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .speed-card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      padding: 16px;
+    }
+
+    .speed-card .label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .speed-card .value {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 15px;
+      color: #cbd5e1;
+    }
+
+    /* Section title */
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    /* Equivalences grid */
+    .equiv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .equiv-card {
+      background: rgba(15,23,42,0.4);
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .equiv-card .icon { font-size: 24px; }
+
+    .equiv-card .number {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 22px;
+      color: var(--text-primary);
+    }
+
+    .equiv-card .desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    .equiv-card .unit {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    /* Mega section */
+    .mega-title {
+      font-size: clamp(18px, 4vw, 24px);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .mega-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .mega-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      margin-bottom: 14px;
+    }
+
+    .mega-card .head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .mega-card .icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .mega-card .name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .mega-card .desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .mega-card .source {
+      font-size: 10px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      margin-top: 1px;
+    }
+
+    .mega-card .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .mega-card .metric {
+      text-align: center;
+    }
+
+    .mega-card .metric .mlabel {
+      font-size: 9px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .mega-card .metric .mvalue {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .mega-card .metric .bar-track {
+      height: 3px;
+      border-radius: 2px;
+      margin-top: 6px;
+      background: var(--border-subtle);
+      overflow: hidden;
+    }
+
+    .mega-card .metric .bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      opacity: 0.6;
+    }
+
+    /* Summary box */
+    .summary-box {
+      margin-top: 18px;
+      padding: 20px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.06), rgba(139,92,246,0.06));
+      border: 1px solid rgba(99,102,241,0.12);
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    /* Search section */
+    .search-section { margin-top: 48px; }
+
+    .search-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .search-header .big-icon { font-size: 40px; margin-bottom: 12px; }
+
+    .search-header h2 {
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--violet-pastel) 0%, var(--indigo-main) 50%, var(--blue-accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+      margin: 0 0 10px;
+    }
+
+    .search-header p {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .search-box {
+      background: var(--bg-card-strong);
+      border-radius: 20px;
+      border: 1px solid var(--border-indigo);
+      padding: 24px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 60px rgba(99,102,241,0.06), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    .search-row {
+      display: flex;
+      gap: 10px;
+      position: relative;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 18px 20px;
+      border-radius: 14px;
+      background: rgba(8,12,24,0.7);
+      border: 1px solid rgba(99,102,241,0.25);
+      color: var(--text-primary);
+      font-size: 17px;
+      font-family: var(--font-body);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: rgba(99,102,241,0.5);
+      box-shadow: 0 0 20px rgba(99,102,241,0.1);
+    }
+
+    .search-input::placeholder { color: var(--text-dim); }
+
+    .search-btn {
+      padding: 18px 32px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font-body);
+      flex-shrink: 0;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.3);
+      transition: opacity 0.2s;
+    }
+
+    .search-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: rgba(99,102,241,0.2);
+      box-shadow: none;
+    }
+
+    .search-btn.loading {
+      cursor: wait;
+      background: rgba(99,102,241,0.2);
+      box-shadow: none;
+    }
+
+    /* Suggestions dropdown */
+    .suggestions {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: rgba(10,14,23,0.97);
+      border: 1px solid var(--border-indigo);
+      border-radius: 14px;
+      padding: 10px;
+      z-index: 20;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+      display: none;
+    }
+
+    .suggestions.visible { display: block; }
+
+    .suggestions .sug-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      padding: 6px 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .suggestions .sug-item {
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .suggestions .sug-item:hover {
+      background: rgba(99,102,241,0.12);
+    }
+
+    /* Loading spinner */
+    .search-loading {
+      margin-top: 20px;
+      padding: 28px;
+      border-radius: 14px;
+      background: rgba(8,12,24,0.5);
+      border: 1px solid rgba(99,102,241,0.1);
+      text-align: center;
+      display: none;
+    }
+
+    .search-loading.visible { display: block; }
+
+    .spinner {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(99,102,241,0.2);
+      border-top-color: var(--indigo-main);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .search-loading .text {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+
+    /* Search error */
+    .search-error {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 12px;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2);
+      font-size: 14px;
+      color: #f87171;
+      display: none;
+    }
+
+    .search-error.visible { display: block; }
+
+    /* Search result */
+    .search-result {
+      margin-top: 20px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(99,102,241,0.15);
+      background: rgba(8,12,24,0.5);
+      display: none;
+    }
+
+    .search-result.visible { display: block; }
+
+    .search-result .result-head {
+      padding: 24px 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .search-result .result-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .search-result .result-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .search-result .result-cost {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 34px;
+      color: var(--indigo-main);
+      margin-top: 14px;
+    }
+
+    .search-result .result-source {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      margin-top: 4px;
+    }
+
+    .search-result .result-metrics {
+      padding: 20px 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .search-result .result-metric {
+      text-align: center;
+    }
+
+    .search-result .result-metric .rlabel {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .search-result .result-metric .rvalue {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    .search-result .result-bar-wrap {
+      padding: 0 24px 20px;
+    }
+
+    .search-result .result-bar-track {
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border-subtle);
+      overflow: hidden;
+    }
+
+    .search-result .result-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--indigo-main), var(--violet-light));
+      min-width: 3px;
+    }
+
+    .search-result .result-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 6px;
+      font-family: var(--font-mono);
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 10px;
+      color: var(--text-faint);
+      text-align: center;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <span class="badge">🇪🇸 Gasto en pensiones públicas · España 2026</span>
+  </div>
+  <h1>Contador en tiempo real</h1>
+  <p class="subtitle">Del 1 de enero al 31 de diciembre. Estimación: <span id="gasto-anual-label"></span> € anuales (proyección IVIE).</p>
+
+  <!-- Counter -->
+  <div class="counter-card">
+    <div class="counter-value">
+      <span id="counter-digits">0,00</span><span class="eur">€</span>
+    </div>
+    <div class="day-info">Día <span id="day-of-year">1</span> de <span id="days-in-year">365</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-labels">
+      <span>1 ene</span><span id="progress-pct">0,00%</span><span>31 dic</span>
+    </div>
+  </div>
+
+  <!-- Speed -->
+  <div class="speed-grid" id="speed-grid"></div>
+
+  <!-- Equivalences -->
+  <div style="margin-top: 32px;">
+    <h2 class="section-title">Equivalencia acumulada</h2>
+    <div class="equiv-grid" id="equiv-grid"></div>
+  </div>
+
+  <!-- Megaprojects -->
+  <div style="margin-top: 40px;">
+    <div class="mega-title">¿Sabías cuánto cuestan estas cosas?</div>
+    <p class="mega-subtitle">Comparamos grandes presupuestos, obras históricas y megaproyectos con el gasto español en pensiones. Las cifras hablan.</p>
+    <div id="mega-list"></div>
+    <div class="summary-box" id="summary-box"></div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-section">
+    <div class="search-header">
+      <div class="big-icon">🔍</div>
+      <h2>Busca cualquier coste o presupuesto</h2>
+      <p>Escribe una obra, un presupuesto nacional, una fortuna, un rescate...<br>y te diré <strong style="color: #94a3b8">cuántos días de pensiones españolas</strong> equivale.</p>
+    </div>
+    <div class="search-box">
+      <div class="search-row">
+        <input type="text" class="search-input" id="search-input" placeholder="Ej: Presupuesto de Defensa de EE.UU." />
+        <button class="search-btn" id="search-btn">Buscar</button>
+        <div class="suggestions" id="suggestions"></div>
+      </div>
+      <div class="search-loading" id="search-loading">
+        <div class="spinner"></div>
+        <div class="text">Buscando datos actualizados con IA…</div>
+      </div>
+      <div class="search-error" id="search-error"></div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Estimación IVIE 2026: 229.263 M€ en pensiones públicas totales. Interpolación lineal.
+    <br>Defensa EE.UU.: 838.700 M$ (Congreso FY2026). NASA: 24.440 M$ (Congreso FY2026). Programa Apolo: ~200.000 M$ (Wikipedia). Rescate bancario: ~100.000 M€ (El Economista).
+    <br>Proyecto Manhattan: ~28.000 M$ (Wikipedia). Burj Khalifa: ~1.500 M$ (Sotheby's). Bernabéu: 1.347 M€ (Real Madrid, julio 2025).
+    <br>La búsqueda utiliza IA (Claude) con acceso a web para obtener datos actualizados.
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATOS
+// ============================================================
+const GASTO_ANUAL = 229_263_000_000;
+const YEAR = 2026;
+const START = new Date(YEAR + "-01-01T00:00:00").getTime();
+const END = new Date((YEAR + 1) + "-01-01T00:00:00").getTime();
+const TOTAL_MS = END - START;
+const EUR_PER_MS = GASTO_ANUAL / TOTAL_MS;
+const EUR_PER_SEC = EUR_PER_MS * 1000;
+const EUR_PER_MIN = EUR_PER_SEC * 60;
+const EUR_PER_HOUR = EUR_PER_MIN * 60;
+const EUR_PER_DAY = EUR_PER_HOUR * 24;
+const EUR_PER_MONTH = GASTO_ANUAL / 12;
+
+const COMPARISONS = [
+  { label: "Salarios medios anuales", value: 28_360, icon: "👤" },
+  { label: "Viviendas (precio medio)", value: 195_000, icon: "🏠" },
+  { label: "Coches eléctricos", value: 35_000, icon: "⚡" },
+  { label: "Becas universitarias", value: 3_500, icon: "🎓" },
+];
+
+const MEGAPROJECTS = [
+  { name: "Presupuesto Defensa EE.UU.", cost: 771_600_000_000, icon: "🎖️", color: "#dc2626", desc: "Gasto militar anual aprobado por el Congreso (FY2026)", source: "838.700 M$ (Congreso, ene. 2026) ≈ 771.600 M€" },
+  { name: "Programa Apolo", cost: 185_000_000_000, icon: "🚀", color: "#f59e0b", desc: "Llevar al hombre a la Luna (1961–72)", source: "~200.000 M$ ajustados ≈ 185.000 M€" },
+  { name: "Rescate bancario español", cost: 100_000_000_000, icon: "🏦", color: "#ef4444", desc: "Ayudas al sector financiero (2009–2012)", source: "~100.000 M€ (FROB + FGD + Sareb)" },
+  { name: "Proyecto Manhattan", cost: 26_000_000_000, icon: "☢️", color: "#22d3ee", desc: "Programa nuclear EE.UU. (1942–46)", source: "~28.000 M$ ajustados ≈ 26.000 M€" },
+  { name: "Presupuesto anual de la NASA", cost: 22_500_000_000, icon: "🛰️", color: "#06b6d4", desc: "Presupuesto aprobado por el Congreso (FY2026)", source: "24.440 M$ (Congreso, ene. 2026) ≈ 22.500 M€" },
+  { name: "Burj Khalifa", cost: 1_400_000_000, icon: "🏗️", color: "#818cf8", desc: "Edificio más alto del mundo, 828 m (2010)", source: "~1.500 M$ ≈ 1.400 M€" },
+  { name: "Nuevo Santiago Bernabéu", cost: 1_347_000_000, icon: "⚽", color: "#a78bfa", desc: "Remodelación del estadio (2019–2026)", source: "1.347 M€ (Real Madrid, julio 2025)" },
+];
+
+const SUGGESTIONS = [
+  "Presupuesto de Defensa de EE.UU.",
+  "PIB de España",
+  "Coste del Canal de Panamá",
+  "Fortuna de Elon Musk",
+  "Presupuesto anual de la NASA",
+  "Coste de los Juegos Olímpicos de París 2024",
+  "Deuda pública de España",
+  "Coste del túnel del Canal de la Mancha",
+];
+
+// ============================================================
+// UTILIDADES DE FORMATO
+// ============================================================
+function formatEur(n) {
+  if (n < 0) return "0,00";
+  var fixed = n.toFixed(2);
+  var parts = fixed.split(".");
+  return parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "," + parts[1];
+}
+
+function formatCompact(n) {
+  if (n >= 1e12) return (n / 1e12).toFixed(2).replace(".", ",") + " B";
+  if (n >= 1e9) return (n / 1e9).toFixed(1).replace(".", ",") + " mil M";
+  if (n >= 1e6) return (n / 1e6).toFixed(1).replace(".", ",") + " M";
+  if (n >= 1e3) return (n / 1e3).toFixed(0) + " mil";
+  return n.toFixed(0);
+}
+
+function fmtMult(v) {
+  if (v >= 1000) return (v / 1000).toFixed(1).replace(".", ",") + " mil";
+  if (v >= 100) return Math.floor(v).toLocaleString("es-ES");
+  if (v >= 10) return v.toFixed(1).replace(".", ",");
+  if (v >= 1) return v.toFixed(2).replace(".", ",");
+  return v.toFixed(3).replace(".", ",");
+}
+
+// ============================================================
+// ELEMENTOS DEL DOM
+// ============================================================
+var counterDigits = document.getElementById("counter-digits");
+var dayOfYearEl = document.getElementById("day-of-year");
+var daysInYearEl = document.getElementById("days-in-year");
+var progressFill = document.getElementById("progress-fill");
+var progressPct = document.getElementById("progress-pct");
+var gastoAnualLabel = document.getElementById("gasto-anual-label");
+
+gastoAnualLabel.textContent = formatCompact(GASTO_ANUAL);
+daysInYearEl.textContent = Math.round(TOTAL_MS / 86400000);
+
+// ============================================================
+// VELOCIDADES (estáticas)
+// ============================================================
+var speedData = [
+  { l: "Por segundo", v: EUR_PER_SEC },
+  { l: "Por minuto", v: EUR_PER_MIN },
+  { l: "Por hora", v: EUR_PER_HOUR },
+  { l: "Por día", v: EUR_PER_DAY },
+];
+
+var speedGrid = document.getElementById("speed-grid");
+speedData.forEach(function(s) {
+  var card = document.createElement("div");
+  card.className = "speed-card";
+  card.innerHTML = '<div class="label">' + s.l + '</div><div class="value">' + formatCompact(s.v) + ' €</div>';
+  speedGrid.appendChild(card);
+});
+
+// ============================================================
+// EQUIVALENCIAS (se actualizan con el contador)
+// ============================================================
+var equivGrid = document.getElementById("equiv-grid");
+var equivValueEls = [];
+
+COMPARISONS.forEach(function(c) {
+  var card = document.createElement("div");
+  card.className = "equiv-card";
+  var numEl = document.createElement("div");
+  numEl.className = "number";
+  numEl.textContent = "0";
+  card.innerHTML = '<div class="icon">' + c.icon + '</div>';
+  card.appendChild(numEl);
+  card.innerHTML += '<div class="desc">' + c.label + '<br><span class="unit">(' + formatCompact(c.value) + ' €/ud.)</span></div>';
+  // Re-query the number element after innerHTML modification
+  equivGrid.appendChild(card);
+  equivValueEls.push(card.querySelector(".number"));
+});
+
+// ============================================================
+// MEGAPROYECTOS (estáticos)
+// ============================================================
+var megaList = document.getElementById("mega-list");
+
+MEGAPROJECTS.forEach(function(p) {
+  var perDay = EUR_PER_DAY / p.cost;
+  var perMonth = EUR_PER_MONTH / p.cost;
+  var perYear = GASTO_ANUAL / p.cost;
+  var maxVal = perYear;
+
+  var items = [
+    { label: "1 día", val: perDay },
+    { label: "1 mes", val: perMonth },
+    { label: "1 año", val: perYear },
+  ];
+
+  var metricsHtml = items.map(function(item) {
+    var displayVal = item.val < 1 ? "×" + fmtMult(item.val) : fmtMult(item.val);
+    var barW = Math.max(2, (item.val / maxVal) * 100);
+    return '<div class="metric">' +
+      '<div class="mlabel">' + item.label + '</div>' +
+      '<div class="mvalue" style="color:' + p.color + '">' + displayVal + '</div>' +
+      '<div class="bar-track"><div class="bar-fill" style="width:' + barW + '%; background:' + p.color + '"></div></div>' +
+      '</div>';
+  }).join("");
+
+  var card = document.createElement("div");
+  card.className = "mega-card";
+  card.innerHTML =
+    '<div class="head">' +
+      '<div class="icon-box" style="background:' + p.color + '15; border: 1px solid ' + p.color + '30">' + p.icon + '</div>' +
+      '<div style="min-width:0">' +
+        '<div class="name">' + p.name + '</div>' +
+        '<div class="desc">' + p.desc + '</div>' +
+        '<div class="source">' + p.source + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="metrics">' + metricsHtml + '</div>';
+
+  megaList.appendChild(card);
+});
+
+// Summary
+var summaryBox = document.getElementById("summary-box");
+summaryBox.innerHTML =
+  '<strong style="color:#c4b5fd">En resumen:</strong> el gasto anual en pensiones de España es casi ' +
+  '<strong style="color:#dc2626">un tercio del presupuesto militar de EE.UU.</strong>, equivale a ' +
+  '<strong style="color:#f59e0b">' + (GASTO_ANUAL / 185e9).toFixed(1).replace(".",",") + ' Programas Apolo</strong>, ' +
+  '<strong style="color:#06b6d4">' + (GASTO_ANUAL / 22.5e9).toFixed(0) + ' presupuestos anuales de la NASA</strong>, ' +
+  '<strong style="color:#22d3ee">' + (GASTO_ANUAL / 26e9).toFixed(1).replace(".",",") + ' Proyectos Manhattan</strong> o ' +
+  '<strong style="color:#a78bfa">' + Math.floor(GASTO_ANUAL / 1.347e9) + ' estadios Bernabéu</strong>.';
+
+// ============================================================
+// ANIMACIÓN DEL CONTADOR
+// ============================================================
+var lastTick = 0;
+
+function tick(ts) {
+  if (ts - lastTick > 40) {
+    var now = Date.now();
+    var elapsed = Math.max(0, Math.min(now - START, TOTAL_MS));
+    var eur = elapsed * EUR_PER_MS;
+    var pct = (elapsed / TOTAL_MS) * 100;
+
+    counterDigits.textContent = formatEur(eur);
+    dayOfYearEl.textContent = Math.floor((now - START) / 86400000) + 1;
+    progressFill.style.width = pct + "%";
+    progressPct.textContent = pct.toFixed(2) + "%";
+
+    // Update equivalences
+    COMPARISONS.forEach(function(c, i) {
+      equivValueEls[i].textContent = Math.floor(eur / c.value).toLocaleString("es-ES");
+    });
+
+    lastTick = ts;
+  }
+  requestAnimationFrame(tick);
+}
+
+requestAnimationFrame(tick);
+
+// ============================================================
+// BUSCADOR CON IA
+// ============================================================
+var searchInput = document.getElementById("search-input");
+var searchBtn = document.getElementById("search-btn");
+var suggestionsEl = document.getElementById("suggestions");
+var searchLoading = document.getElementById("search-loading");
+var searchError = document.getElementById("search-error");
+var searchResult = document.getElementById("search-result");
+
+// Build suggestions dropdown
+var sugHtml = '<div class="sug-label">Prueba con…</div>';
+SUGGESTIONS.forEach(function(s) {
+  sugHtml += '<div class="sug-item" data-query="' + s + '">' + s + '</div>';
+});
+suggestionsEl.innerHTML = sugHtml;
+
+// Suggestion click
+suggestionsEl.addEventListener("click", function(e) {
+  var item = e.target.closest(".sug-item");
+  if (item) {
+    searchInput.value = item.dataset.query;
+    suggestionsEl.classList.remove("visible");
+    doSearch(item.dataset.query);
+  }
+});
+
+// Show/hide suggestions
+searchInput.addEventListener("focus", function() {
+  if (!searchInput.value) suggestionsEl.classList.add("visible");
+});
+
+searchInput.addEventListener("input", function() {
+  if (!searchInput.value) {
+    suggestionsEl.classList.add("visible");
+  } else {
+    suggestionsEl.classList.remove("visible");
+  }
+});
+
+searchInput.addEventListener("blur", function() {
+  setTimeout(function() { suggestionsEl.classList.remove("visible"); }, 200);
+});
+
+searchInput.addEventListener("keydown", function(e) {
+  if (e.key === "Enter") doSearch();
+});
+
+searchBtn.addEventListener("click", function() { doSearch(); });
+
+function doSearch(overrideQuery) {
+  var q = overrideQuery || searchInput.value;
+  if (!q.trim()) return;
+  searchInput.value = q;
+
+  suggestionsEl.classList.remove("visible");
+  searchLoading.classList.add("visible");
+  searchError.classList.remove("visible");
+  searchResult.classList.remove("visible");
+  searchBtn.classList.add("loading");
+  searchBtn.textContent = "Buscando…";
+  searchBtn.disabled = true;
+
+  fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      tools: [{ type: "web_search_20250305", name: "web_search" }],
+      system: "Eres un asistente que busca el coste o presupuesto de algo y lo convierte en \"días de pensiones españolas\".\n" +
+        "DATOS CLAVE:\n" +
+        "- Gasto anual pensiones España 2026: 229.263.000.000 €\n" +
+        "- Gasto diario: " + Math.round(EUR_PER_DAY).toLocaleString("es-ES") + " €\n" +
+        "- Gasto mensual: " + Math.round(EUR_PER_MONTH).toLocaleString("es-ES") + " €\n" +
+        "INSTRUCCIONES:\n" +
+        "1. Usa web_search para encontrar el dato más actualizado\n" +
+        "2. Convierte a euros si es necesario (1 USD ≈ 0,92 EUR)\n" +
+        "3. Responde SOLO con JSON válido, sin markdown ni backticks:\n" +
+        "{\"nombre\":\"Nombre\",\"coste_eur\":NÚMERO,\"descripcion\":\"Contexto breve\",\"fuente\":\"Origen del dato\",\"dias_pensiones\":NÚMERO,\"meses_pensiones\":NÚMERO,\"años_pensiones\":NÚMERO}\n" +
+        "Calcula: dias = coste_eur / " + Math.round(EUR_PER_DAY) + ", meses = coste_eur / " + Math.round(EUR_PER_MONTH) + ", años = coste_eur / " + GASTO_ANUAL + "\n" +
+        "IMPORTANTE: Responde ÚNICAMENTE el JSON.",
+      messages: [{ role: "user", content: "Busca el coste o presupuesto de: " + q }],
+    }),
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    var textBlocks = (data.content || [])
+      .filter(function(b) { return b.type === "text"; })
+      .map(function(b) { return b.text; })
+      .join("");
+
+    var parsed = JSON.parse(textBlocks.replace(/```json|```/g, "").trim());
+    showResult(parsed);
+  })
+  .catch(function(err) {
+    console.error(err);
+    searchError.textContent = "No he podido obtener el dato. Prueba a reformular la búsqueda.";
+    searchError.classList.add("visible");
+  })
+  .finally(function() {
+    searchLoading.classList.remove("visible");
+    searchBtn.classList.remove("loading");
+    searchBtn.textContent = "Buscar";
+    searchBtn.disabled = false;
+  });
+}
+
+function showResult(r) {
+  var dias = r.dias_pensiones;
+  var meses = r.meses_pensiones;
+  var anios = r.años_pensiones || r["anos_pensiones"];
+
+  function fmtMetric(v) {
+    if (v == null) return "—";
+    if (typeof v !== "number") return v;
+    return v >= 100 ? Math.round(v).toLocaleString("es-ES") : v.toFixed(1).replace(".", ",");
+  }
+
+  var barPct = Math.min(100, (r.coste_eur / GASTO_ANUAL) * 100);
+  var barPctLabel = ((r.coste_eur / GASTO_ANUAL) * 100).toFixed(2).replace(".", ",");
+
+  searchResult.innerHTML =
+    '<div class="result-head">' +
+      '<div class="result-name">' + r.nombre + '</div>' +
+      '<div class="result-desc">' + r.descripcion + '</div>' +
+      '<div class="result-cost">' + formatCompact(r.coste_eur) + ' €</div>' +
+      '<div class="result-source">Fuente: ' + r.fuente + '</div>' +
+    '</div>' +
+    '<div class="result-metrics">' +
+      '<div class="result-metric"><div class="rlabel">Días de pensiones</div><div class="rvalue" style="color:#6366f1">' + fmtMetric(dias) + '</div></div>' +
+      '<div class="result-metric"><div class="rlabel">Meses de pensiones</div><div class="rvalue" style="color:#818cf8">' + fmtMetric(meses) + '</div></div>' +
+      '<div class="result-metric"><div class="rlabel">Años de pensiones</div><div class="rvalue" style="color:#a78bfa">' + fmtMetric(anios) + '</div></div>' +
+    '</div>' +
+    (r.coste_eur ?
+      '<div class="result-bar-wrap">' +
+        '<div class="result-bar-track"><div class="result-bar-fill" style="width:' + barPct + '%"></div></div>' +
+        '<div class="result-bar-labels"><span>0</span><span>= ' + barPctLabel + '% del gasto anual</span><span>' + formatCompact(GASTO_ANUAL) + ' €</span></div>' +
+      '</div>' : '');
+
+  searchResult.classList.add("visible");
+}
+</script>
+
+</body>
+</html>
